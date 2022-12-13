@@ -1,0 +1,11 @@
+opencv-python
+pytesseract
+Pillow
+gradio
+timm
+transformers
+numpy
+pandas
+torch
+craft_text_detector
+transformers[sentencepiece]
