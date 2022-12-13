@@ -424,7 +424,9 @@ def process_image(image):
         csv_path = "/content/sample_data/table_" + str(idx)
         df = create_dataframe(sequential_cell_img_list, max_cols, max_rows, csv_path)
         result.append(df)
-    res = result[0].to_json()
+    res = result[0].rename(columns={'Item': 'name', 'Total Cost': 'amount'})[["name", "amount"]]
+    res["cost Code"] = ""
+    res = {"items": res.to_json(orient='records')}
     return res
 
 
@@ -441,5 +443,6 @@ iface = gr.Interface(
     description=description,
     article=article,
     examples=examples,
+    server_name="0.0.0.0",
 )
 iface.launch(debug=True)
