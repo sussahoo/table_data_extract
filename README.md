@@ -1,4 +1,4 @@
-# OCR for extracting table data from images and pdfs
+# Transformer based model to OCR (for extracting table like data) from images and pdfs
 
 This is a specific OCR that looks for Items and Costs columns in the image. 
 
