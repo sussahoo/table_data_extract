@@ -14,6 +14,7 @@ from transformers import DetrFeatureExtractor
 from transformers import TableTransformerForObjectDetection
 import torch
 import gradio as gr
+import pdf2image
 
 
 def plot_results_detection(
@@ -369,9 +370,43 @@ def create_dataframe(cells_pytess_result: list, max_cols: int, max_rows: int, cs
 
     return df
 
+def postprocess_dataframes(result_tables):
+    """
+    Normalize column names
+    """
+    # df.columns = [col.replace('|', '') for col in df.columns]
+    res = {}
+    for idx, table_df in enumerate(result_tables):
+        result_df = pd.DataFrame()
+        for col in table_df.columns:
+            if col.lower().startswith("item"):
+                result_df["name"] = table_df[col].copy()
+            if (
+                col.lower().startswith("total")
+                or col.lower().startswith("amount")
+                or col.lower().startswith("cost")
+            ):
+                result_df["amount"] = table_df[col].copy()
+        print(result_df.columns)
+        if len(result_df.columns) == 0:
+            result_df["name"] = table_df.iloc[:, 0].copy()
+            result_df["amount"] = table_df.iloc[:, 1].copy()
 
-def process_image(image):
-    TD_THRESHOLD = 0.9
+        result_df["cost_code"] = ""
+        res["Table1" + str(idx)] = result_df.to_json(orient="records")
+    return res
+
+
+def process_image(image, pdf):
+    if pdf:
+        path_to_pdf = pdf.name
+        # convert PDF to PIL images (one image by page)
+        first_page=True # we want here only the first page as image
+        if first_page: last_page = 1
+        else: last_page = None
+        imgs = pdf2image.convert_from_path(path_to_pdf, last_page=last_page)
+        image = imgs[0]
+    TD_THRESHOLD = 0.7
     TSR_THRESHOLD = 0.8
     padd_top = 100
     padd_left = 100
@@ -424,10 +459,8 @@ def process_image(image):
         csv_path = "/content/sample_data/table_" + str(idx)
         df = create_dataframe(sequential_cell_img_list, max_cols, max_rows, csv_path)
         result.append(df)
-    res = result[0].rename(columns={'Item': 'name', 'Total Cost': 'amount'})[["name", "amount"]]
-    res["cost Code"] = ""
-    res = {"items": res.to_json(orient='records')}
-    return res
+    output = postprocess_dataframes(result)
+    return output
 
 
 title = "Interactive demo OCR: microsoft - table-transformer-detection + tesseract"
@@ -437,12 +470,11 @@ examples = [["image_0.png"]]
 
 iface = gr.Interface(
     fn=process_image,
-    inputs=gr.Image(type="pil"),
+    inputs=[gr.Image(type="pil"), gr.File(label="PDF")],
     outputs="text",
     title=title,
     description=description,
     article=article,
     examples=examples,
-    server_name="0.0.0.0",
 )
 iface.launch(debug=True)
