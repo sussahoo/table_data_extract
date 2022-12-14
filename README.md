@@ -1,4 +1,4 @@
-# table_data_extract
+# OCR for extracting table data from images and pdfs
 
 This is a specific OCR that looks for Items and Costs columns in the image. 
 
@@ -19,7 +19,7 @@ Google Colab :
 4. Copy app.py to a cell in the colab and run
 
 Huggingface:
-- https://huggingface.co/spaces/sussahoo/table_extraction
+- url : https://huggingface.co/spaces/sussahoo/table_extraction
 
 
 
