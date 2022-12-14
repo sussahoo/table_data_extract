@@ -397,15 +397,15 @@ def postprocess_dataframes(result_tables):
     return res
 
 
-def process_image(image, pdf):
-    if pdf:
-        path_to_pdf = pdf.name
-        # convert PDF to PIL images (one image by page)
-        first_page=True # we want here only the first page as image
-        if first_page: last_page = 1
-        else: last_page = None
-        imgs = pdf2image.convert_from_path(path_to_pdf, last_page=last_page)
-        image = imgs[0]
+def process_image(image):
+    # if pdf:
+    #     path_to_pdf = pdf.name
+    #     # convert PDF to PIL images (one image by page)
+    #     first_page=True # we want here only the first page as image
+    #     if first_page: last_page = 1
+    #     else: last_page = None
+    #     imgs = pdf2image.convert_from_path(path_to_pdf, last_page=last_page)
+    #     image = imgs[0]
     TD_THRESHOLD = 0.7
     TSR_THRESHOLD = 0.8
     padd_top = 100
@@ -466,15 +466,15 @@ def process_image(image, pdf):
 title = "Interactive demo OCR: microsoft - table-transformer-detection + tesseract"
 description = "Demo for microsoft - table-transformer-detection + tesseract"
 article = "<p style='text-align: center'></p>"
-examples = [["image_0.png"]]
+examples = [["image_0.png"],["M5.png"],["M7.png"],["M8.png"],["M9.png"]]
 
 iface = gr.Interface(
     fn=process_image,
-    inputs=[gr.Image(type="pil"), gr.File(label="PDF")],
+    inputs=gr.Image(type="pil"),
     outputs="text",
     title=title,
     description=description,
     article=article,
     examples=examples,
 )
-iface.launch(debug=True)
+iface.launch(debug=False, server_name="0.0.0.0")
